@@ -1,11 +1,13 @@
 from dotenv import load_dotenv
 import os
 import json
+from file_utils import slugify_basic
 
 from annie_website import CourseLinkScraper, DialogueTabFetcher
 
 ANNIE_EPISODE_LIST_URL = "https://learnvietnamesewithannie.com/podcast?page="
 ANNIE_EPISODE_LIST_LAST_PAGE = 171
+PODCAST_DIR = "podcasts"
 
 load_dotenv(override=True)
 
@@ -19,9 +21,11 @@ class Dialogue():
 
     def __str__(self):
         return f"""Title:
+        
         {self.title}
         
         Dialogue:
+        
         {self.dialogue}
         """
 
@@ -35,8 +39,19 @@ def get_dialogue(podcast_url):
     podcast_website = DialogueTabFetcher(podcast_url, annie_cookie_dict)
     return Dialogue(podcast_website.title, podcast_website.get_dialogue_tab_html())
 
-for i in range(1, 2):
+def save_podcast(title: str, content: str):
+    safe_title = slugify_basic(title)
+    filepath = os.path.join(PODCAST_DIR, f"{safe_title}.txt")
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(content)
+    print ("wrote file: " + safe_title)
+
+os.makedirs(PODCAST_DIR, exist_ok=True)
+
+for i in range(1, ANNIE_EPISODE_LIST_LAST_PAGE):
     episode_links = get_episode_list(i)
     for episode in episode_links:
         dialogue = get_dialogue(episode)
-        print(dialogue)
+        save_podcast(dialogue.title, dialogue.__str__())
+
