@@ -2,12 +2,8 @@ from dotenv import load_dotenv
 import os
 import json
 from file_utils import slugify_basic
-
+from annie_constants import *
 from annie_website import CourseLinkScraper, DialogueTabFetcher
-
-ANNIE_EPISODE_LIST_URL = "https://learnvietnamesewithannie.com/podcast?page="
-ANNIE_EPISODE_LIST_LAST_PAGE = 171
-PODCAST_DIR = "podcasts"
 
 load_dotenv(override=True)
 
