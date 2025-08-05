@@ -43,14 +43,20 @@ class DialogueTabFetcher(Website):
                 "id": "dialogue"
             }
         )
-        if target_div:
-            for irrelevant in target_div(["script", "style", "img", "input", "audio", "source"]):
-                irrelevant.decompose()
-            all_spans = target_div.find_all("span")
-            top_level_spans = [
-                span for span in all_spans if not span.find_parent("span")
-            ]
+        if not target_div:
+            return None
 
-            lines = [span.get_text(strip=True, separator=" ") for span in top_level_spans if span.get_text(strip=True)]
-            return "\n".join(lines)
-        return None
+        for irrelevant in target_div(["script", "style", "img", "input", "audio", "source"]):
+            irrelevant.decompose()
+
+        inner_divs = target_div.find_all("div")
+        block_tags = {"p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "li", "span"}
+        lines = []
+        for div in inner_divs:
+            for element in div.find_all(recursive=False):
+                if element.name in block_tags:
+                    text = element.get_text(strip=True, separator=" ")
+                    if text:
+                        lines.append(text)
+
+        return "\n".join(lines)
